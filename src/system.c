@@ -40,7 +40,6 @@ limitations under the License.
 void SYSTEM_init(void) {
     OSCCONbits.IRCF = 0xf; // 16 MHz HFINTOSC 3x PLL = 48MHz
     ACTCON = 0x90; // ACT enabled, FS-USB mode
-    CLKRCON = 0xB7; //Clock reference: DIV128, output disable, slew-rate enable
     UART_init();
     EEPROM_init();
     USBDeviceInit(); //usb_device.c.  Initializes USB module SFRs and firmware
