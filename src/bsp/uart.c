@@ -35,8 +35,8 @@ void UART_init(void) {
     UART_TRISTx = OUTPUT_PIN;
     TXSTA = 0x24; // TX enable BRGH=1
     RCSTA = 0x90; // RX enable
-    SPBRG = 0xCF;
-    SPBRGH = 0x00; // 48MHz -> 19200 baud
+    SPBRG = 0x70;
+    SPBRGH = 0x02; // 48MHz -> 19200 baud
 #if defined (UART_INVERTED) && UART_INVERTED == 1
     BAUDCON = 0x18; // BRG16 = 1, SCKP = 1 
 #else
