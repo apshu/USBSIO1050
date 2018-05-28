@@ -49,6 +49,7 @@
 #define USB_CDC_RI_ACTIVE_LEVEL 1
 #define mInitDSRPin()       do {  } while (0)
 #define mInitRIPin()        do {  } while (0)
+#define mInitCDPin()        do {  } while (0)
 #define COMMAND_isActive()  ( !COMMAND_IN )
 #define MOTOR_isActive()    ( !MOTOR_IN )
 
