@@ -40,6 +40,7 @@ limitations under the License.
 void SYSTEM_init(void) {
     OSCCONbits.IRCF = 0xf; // 16 MHz HFINTOSC 3x PLL = 48MHz
     ACTCON = 0x90; // ACT enabled, FS-USB mode
+    ANSELA = ANSELC = 0;
     UART_init();
     EEPROM_init();
     USBDeviceInit(); //usb_device.c.  Initializes USB module SFRs and firmware
