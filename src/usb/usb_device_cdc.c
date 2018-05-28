@@ -77,7 +77,7 @@ LINE_CODING line_coding;    // Buffer to store line coding information
 CDC_NOTICE cdc_notice;
 
 #if defined(USB_CDC_SUPPORT_DSR_REPORTING)
-    SERIAL_STATE_NOTIFICATION SerialStatePacket;
+    volatile SERIAL_STATE_NOTIFICATION SerialStatePacket CDC_SERIAL_STATE_BUFFER_ADDRESS_TAG;
 #endif
 
 uint8_t cdc_rx_len;            // total rx length
@@ -320,7 +320,15 @@ void CDCInitEP(void)
 
     #if defined(USB_CDC_SUPPORT_DSR_REPORTING)
       	CDCNotificationInHandle = NULL;
-        mInitDTSPin();  //Configure DTS as a digital input
+#if defined(UART_DSR) || defined(USB_CDC_DSR_ACTIVE_LEVEL)
+        mInitDSRPin();  //Configure DSR as a digital input
+#endif
+#if defined(UART_RI) || defined(USB_CDC_RI_ACTIVE_LEVEL)
+        mInitRIPin();  //Configure RI as a digital input
+#endif
+#if defined(UART_CD) || defined(USB_CDC_CD_ACTIVE_LEVEL)
+        mInitCDPin();  //Configure CD as a digital input
+#endif
       	SerialStateBitmap.byte = 0x00;
       	OldSerialStateBitmap.byte = !SerialStateBitmap.byte;    //To force firmware to send an initial serial state packet to the host.
         //Prepare a SerialState notification element packet (contains info like DSR state)
@@ -367,15 +375,15 @@ void CDCNotificationHandler(void)
 {
     //Check the DTS I/O pin and if a state change is detected, notify the 
     //USB host by sending a serial state notification element packet.
-    if(UART_DTS == USB_CDC_DSR_ACTIVE_LEVEL) //UART_DTS must be defined to be an I/O pin in the hardware profile to use the DTS feature (ex: "PORTXbits.RXY")
-    {
-        SerialStateBitmap.bits.DSR = 1;
-    }  
-    else
-    {
-        SerialStateBitmap.bits.DSR = 0;
-    }        
-    
+#if defined(UART_DSR) || defined(USB_CDC_DSR_ACTIVE_LEVEL)
+    SerialStateBitmap.bits.DSR = (UART_DSR == USB_CDC_DSR_ACTIVE_LEVEL);
+#endif
+#if defined(UART_RI) || defined(USB_CDC_RI_ACTIVE_LEVEL)
+    SerialStateBitmap.bits.RingDetect = (UART_RI == USB_CDC_RI_ACTIVE_LEVEL);
+#endif
+#if defined(UART_CD) || defined(USB_CDC_CD_ACTIVE_LEVEL)
+    SerialStateBitmap.bits.DCD = (UART_CD == USB_CDC_CD_ACTIVE_LEVEL);
+#endif
     //If the state has changed, and the endpoint is available, send a packet to
     //notify the hUSB host of the change.
     if((SerialStateBitmap.byte != OldSerialStateBitmap.byte) && (!USBHandleBusy(CDCNotificationInHandle)))
