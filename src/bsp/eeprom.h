@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#define EEPROM_I2C_ADDRESS  0xC0 
+#define EEPROM_I2C_ADDRESS  0xA0 
 #define EEPROM_PAGE_BYTES   (256)
     
     void EEPROM_init(void);

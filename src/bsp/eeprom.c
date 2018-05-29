@@ -27,11 +27,12 @@ static bit EEPROM_sendAbyte(uint_fast8_t data) {
 void EEPROM_init(void) {
     EEPROM_powerOff();
     SSP1CON1 = 0; //Disable MSSP
-    SSPADD = 0x03;
+    SSP1ADD = 16;
     SSP1CON2 = SSP1CON3 = SSP1STAT = 0;
-    SSP1CON1 = 0x28; //Enable MSSP I2C Master
-    __delay_ms(100);
+    __delay_ms(10);
     EEPROM_powerOn();
+    __delay_ms(10);
+    SSP1CON1 = 0x28; //Enable MSSP I2C Master
 }
 
 //Return false if something went wrong
@@ -39,7 +40,7 @@ void EEPROM_init(void) {
 static bool EEPROM_writeNoStop(uint_fast24_t dataAddress, uint8_t *buf, uint_fast16_t numBytes) {
     if (SSP1CON1 == 0x28) {
         SSP1CON2bits.SEN = 1;
-        dataAddress &= ((1 << 18UL) - 1);
+        dataAddress &= (uint_fast24_t)((1UL << 18UL) - 1UL);
         uint_fast8_t dout = (dataAddress >> 16) & 0xFF;
         dout <<= 1;
         dout |= EEPROM_I2C_ADDRESS & 0xFF; //Device address for Write
@@ -88,6 +89,11 @@ bool EEPROM_read(uint_fast24_t dataAddress, uint8_t *buf, uint_fast16_t numBytes
             //EEPROM addressed for read
             if (buf) {
                 while (numBytes) {
+                    SSPCON2bits.RCEN = 1;
+                    SSP1IF = 0;
+                    while (!SSP1IF) {
+                        continue;
+                    }
                     *buf++ = SSP1BUF;
                     --numBytes;
                     SSP1CON2bits.ACKDT = !numBytes;
