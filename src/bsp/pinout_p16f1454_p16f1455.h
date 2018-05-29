@@ -23,7 +23,7 @@ extern "C" {
 #define SDA_TRIS            TRISCbits.TRISC1
 #define SCL_TRIS            TRISCbits.TRISC0
 #define U1RX_IN             PORTCbits.RC5
-#define U1RX_OUT            LATCbits.LATC5
+#define U1RX_OUT            do { #error "rx pin is input only!" } while(0)
 #define U1RX_TRIS           TRISCbits.TRISC5
 #define U1TX_IN             PORTCbits.RC4
 #define U1TX_OUT            LATCbits.LATC4

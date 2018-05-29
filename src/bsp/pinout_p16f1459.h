@@ -16,18 +16,18 @@
 extern "C" {
 #endif
 
-#define SDA_IN              PORTCbits.RC1
-#define SCL_IN              PORTCbits.RC0
-#define SDA_OUT             LATCbits.LATC1
-#define SCL_OUT             LATCbits.LATC0
-#define SDA_TRIS            TRISCbits.TRISC1
-#define SCL_TRIS            TRISCbits.TRISC0
-#define U1RX_IN             PORTCbits.RC5
-#define U1RX_OUT            LATCbits.LATC5
-#define U1RX_TRIS           TRISCbits.TRISC5
-#define U1TX_IN             PORTCbits.RC4
-#define U1TX_OUT            LATCbits.LATC4
-#define U1TX_TRIS           TRISCbits.TRISC4
+#define SDA_IN              PORTBbits.RB4
+#define SCL_IN              PORTBbits.RB6
+#define SDA_OUT             LATBbits.LATB4
+#define SCL_OUT             LATBbits.LATB6
+#define SDA_TRIS            TRISBbits.TRISB4
+#define SCL_TRIS            TRISBbits.TRISB6
+#define U1RX_IN             PORTBbits.RB5
+#define U1RX_OUT            do { #error "rx pin is input only!" } while(0)
+#define U1RX_TRIS           TRISBbits.TRISB5
+#define U1TX_IN             PORTBbits.RB7
+#define U1TX_OUT            LATBbits.LATB7
+#define U1TX_TRIS           TRISBbits.TRISB7
 #define COMMAND_IN          PORTAbits.RA4
 #define COMMAND_OUT         do { #error "COMMAND pin is input only!" } while(0)
 #define COMMAND_TRIS        TRISAbits.TRISA4
@@ -40,7 +40,7 @@ extern "C" {
 #define EEPROM_PWRPIN_IN    PORTCbits.RC2
 #define EEPROM_PWRPIN_OUT   LATCbits.LATC2
 #define EEPROM_PWRPIN_TRIS  TRISCbits.TRISC2
-#define mConfigureIOpins()  do { ANSELA = ANSELC = 0; nWPUEN = 0; WPUA = 0xFF; EEPROM_PWRPIN_OUT = 0; EEPROM_PWRPIN_TRIS = OUTPUT_PIN;} while(0)
+#define mConfigureIOpins()  do { ANSELA = ANSELB = ANSELC = 0; nWPUEN = 0; WPUA = 0xFF; EEPROM_PWRPIN_OUT = 0; EEPROM_PWRPIN_TRIS = OUTPUT_PIN;} while(0)
 
 
 #ifdef	__cplusplus

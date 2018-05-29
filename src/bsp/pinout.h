@@ -17,7 +17,7 @@
 #if (defined(_16F1454)) || defined(_16F1455))
 #include "bsp/pinout_p16f1454_p16f1455.h"
 #elif defined(_16F1459)
-#include "pinout_p16f1459.h"
+#include "bsp/pinout_p16f1459.h"
 #else
 #error "Processor not supported"
 #endif
