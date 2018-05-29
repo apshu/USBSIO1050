@@ -1,6 +1,6 @@
 #include "xc.h"
 
-#if !(defined(_16F1454)) || defined(_16F1455) || defined(_16F1459))
+#if !(defined(_16F1454) || defined(_16F1455) || defined(_16F1459))
 #error "Please use this CONFIG FUSE file with supported MCU"
 #endif
 
