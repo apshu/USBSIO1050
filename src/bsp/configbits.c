@@ -1,9 +1,10 @@
 #include "xc.h"
+
+#if !(defined(_16F1454)) || defined(_16F1455) || defined(_16F1459))
+#error "Please use this CONFIG FUSE file with supported MCU"
+#endif
+
 /** CONFIGURATION Bits **********************************************/
-// PIC 16F1459 fuse configuration:
-// Config word 1 (Oscillator configuration)
-// 20Mhz crystal input scaled to 48Mhz and configured for USB operation
-// CONFIG1
 #pragma config FOSC = INTOSC    // Oscillator Selection Bits (INTOSC oscillator: I/O function on CLKIN pin)
 #pragma config WDTE = SWDTEN    // Watchdog Timer Enable (WDT disabled)
 #if __DEBUG
