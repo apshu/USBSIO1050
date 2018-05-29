@@ -13,28 +13,14 @@
 #define OUTPUT_PIN          0
 
 //Net to pinlist definitions
-#define SDA_IN              PORTCbits.RC1
-#define SCL_IN              PORTCbits.RC0
-#define SDA_OUT             LATCbits.LATC1
-#define SCL_OUT             LATCbits.LATC0
-#define SDA_TRIS            TRISCbits.TRISC1
-#define SCL_TRIS            TRISCbits.TRISC0
-#define U1RX_IN             PORTCbits.RC5
-#define U1RX_OUT            LATCbits.LATC5
-#define U1RX_TRIS           TRISCbits.TRISC5
-#define U1TX_IN             PORTCbits.RC4
-#define U1TX_OUT            LATCbits.LATC4
-#define U1TX_TRIS           TRISCbits.TRISC4
-#define COMMAND_IN          /*TOTO:define pin*/ PORTCbits.RC3
-#define COMMAND_OUT         /*TOTO:define pin*/ do { #error "COMMAND pin is input only!" } while(0)
-#define COMMAND_TRIS        /*TOTO:define pin*/ TRISCbits.TRISC3
-#define MOTOR_IN            /*TOTO:define pin*/ PORTCbits.RC2
-#define MOTOR_OUT           /*TOTO:define pin*/ do { #error "MOTOR pin is input only!" } while(0)
-#define MOTOR_TRIS          /*TOTO:define pin*/ TRISCbits.TRISC2
-#define EEPROM_PWRPIN_IN    /*TOTO:define pin*/ PORTCbits.RC4
-#define EEPROM_PWRPIN_OUT   /*TOTO:define pin*/ LATCbits.LATC4
-#define EEPROM_PWRPIN_TRIS  /*TOTO:define pin*/ TRISCbits.TRISC4
-#define configurePullups()  do { nWPUEN = 0; WPUA = 0xFF; } while(0)
+ 
+#if (defined(_16F1454)) || defined(_16F1455))
+#include "bsp/pinout_p16f1454_p16f1455.h"
+#elif defined(_16F1459)
+#include "pinout_p16f1459.h"
+#else
+#error "Processor not supported"
+#endif
 
 #define UART_TRISTx         U1TX_TRIS
 #define UART_TRISRx         U1RX_TRIS
