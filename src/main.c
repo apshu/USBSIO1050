@@ -31,8 +31,6 @@ limitations under the License.
 #include "bsp/eeprom.h"
 #include "bsp/uart.h"
 
-bit USB_isActive;
-
 /********************************************************************
  * Function:        void main(void)
  *******************************************************************/
@@ -56,7 +54,6 @@ MAIN_RETURN main(void) {
          * top of the while loop. */
         if (USBGetDeviceState() < CONFIGURED_STATE) { /* USB connection not available or not yet complete */
             // implement nMCLR button
-            USB_isActive = false;
             continue; /* Jump back to the top of the while loop. */
         }
 
@@ -65,10 +62,8 @@ MAIN_RETURN main(void) {
          * keyboard commands since we aren't currently communicating to the host
          * thus just continue back to the start of the while loop. */
         if (USBIsDeviceSuspended() == true) {
-            USB_isActive = false;
             continue; // jump back to the top of the loop
         }
-        USB_isActive = true;
 
         //Application specific tasks
         APP_DeviceMSDTasks();
