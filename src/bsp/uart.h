@@ -27,7 +27,7 @@ limitations under the License.
 
 #define UART_ENABLE   RCSTAbits.SPEN
 
-#define UART_TxRdy()    TXSTAbits.TRMT
+#define UART_TxRdy()    (PIR1bits.TXIF )
 bit UART_RxRdy(void);
 void UART_poll(void);
 /*********************************************************************
@@ -44,7 +44,7 @@ void UART_disable(void);
  * Overview:        Sends one character to the UART
  *****************************************************************************/
 void UART_putch(char);
-
+void putch(char c);
 /******************************************************************************
  * Function:        char UART_getch(void)
  * Output:          char c - character to received on the UART

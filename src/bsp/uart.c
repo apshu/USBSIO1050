@@ -23,7 +23,7 @@ limitations under the License.
 
 #include "uart.h"
 
-static uint8_t UART_chin;
+static volatile uint8_t UART_chin;
 static bit UART_isNewChar;
 
 /******************************************************************************
@@ -62,11 +62,11 @@ void UART_enable(void) {
  * Overview:        Print the input character to the UART
  *****************************************************************************/
 void UART_putch(char c) {
-    while (!UART_TxRdy());
     TXREG = c;
 }
 
 void putch(char c) {
+    while (!UART_TxRdy());
     UART_putch(c);
 }
 
@@ -94,7 +94,8 @@ bit UART_RxRdy(void) {
 }
 
 void UART_poll(void) {
-    if ((UART_isNewChar = PIR1bits.RCIF)) {
+    UART_isNewChar = PIR1bits.RCIF;
+    if (UART_RxRdy()) {
         if (RCSTAbits.OERR) // in case of overrun error
         { // we should never see an overrun error, but if we do,
             RCSTAbits.CREN = 0; // reset the port
