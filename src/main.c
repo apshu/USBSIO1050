@@ -36,11 +36,6 @@ limitations under the License.
  *******************************************************************/
 MAIN_RETURN main(void) {
     SYSTEM_init();
-    
-    uint8_t testData[] = "Hello EEPROM";
-//    EEPROM_write(0, testData, sizeof(testData));
-    memset(testData, 0, sizeof(testData));
-//    EEPROM_read(0, testData, sizeof(testData));
     while (1) {
         SYSTEM_Tasks();
         UART_poll();
