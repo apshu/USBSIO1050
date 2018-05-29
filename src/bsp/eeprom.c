@@ -37,40 +37,41 @@ void EEPROM_init(void) {
 //Return false if something went wrong
 
 static bool EEPROM_writeNoStop(uint_fast24_t dataAddress, uint8_t *buf, uint_fast16_t numBytes) {
-    SSP1CON2bits.SEN = 1;
-    dataAddress &= ((1 << 18UL) - 1);
-    uint_fast8_t dout = (dataAddress >> 16) & 0xFF;
-    dout <<= 1;
-    dout |= EEPROM_I2C_ADDRESS & 0xFF; //Device address for Write
-    while (SSP1CON2bits.SEN) {
-        continue;
-    }
-    if (EEPROM_sendAbyte(dout)) {
-        if (EEPROM_sendAbyte(dataAddress >> 8)) {
-            if (EEPROM_sendAbyte(dataAddress)) {
-                //Address set correctly
-                if (buf && numBytes) {
-                    //We want to send something
-                    if (numBytes + (dataAddress & (EEPROM_PAGE_BYTES - 1)) <= EEPROM_PAGE_BYTES) {
-                        //Not crossing page boundary
-                        for (; numBytes; --numBytes) {
-                            if (!EEPROM_sendAbyte(*buf++)) {
-                                //ACK error, STOP already sent, write might happen
-                                __delay_ms(5);
-                                return false;
+    if (SSP1CON1 == 0x28) {
+        SSP1CON2bits.SEN = 1;
+        dataAddress &= ((1 << 18UL) - 1);
+        uint_fast8_t dout = (dataAddress >> 16) & 0xFF;
+        dout <<= 1;
+        dout |= EEPROM_I2C_ADDRESS & 0xFF; //Device address for Write
+        while (SSP1CON2bits.SEN) {
+            continue;
+        }
+        if (EEPROM_sendAbyte(dout)) {
+            if (EEPROM_sendAbyte(dataAddress >> 8)) {
+                if (EEPROM_sendAbyte(dataAddress)) {
+                    //Address set correctly
+                    if (buf && numBytes) {
+                        //We want to send something
+                        if (numBytes + (dataAddress & (EEPROM_PAGE_BYTES - 1)) <= EEPROM_PAGE_BYTES) {
+                            //Not crossing page boundary
+                            for (; numBytes; --numBytes) {
+                                if (!EEPROM_sendAbyte(*buf++)) {
+                                    //ACK error, STOP already sent, write might happen
+                                    __delay_ms(5);
+                                    return false;
+                                }
                             }
+                            //Written
+                            return true;
                         }
-                        //Written
+                    } else {
+                        //Nothing to send, address correctly received by the device
                         return true;
                     }
-                } else {
-                    //Nothing to send, address correctly received by the device
-                    return true;
                 }
             }
         }
     }
-
     return false;
 }
 
