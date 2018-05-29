@@ -35,7 +35,7 @@ extern "C" {
 #define MOTOR_OUT           do { #error "MOTOR pin is input only!" } while(0)
 #define MOTOR_TRIS          TRISAbits.TRISA5
 #define READY_IN            PORTCbits.RC3
-#define READY_OUT           do { #error "MOTOR pin is input only!" } while(0)
+#define READY_OUT           do { #error "READY pin is input only!" } while(0)
 #define READY_TRIS          TRISCbits.TRISC3
 #define EEPROM_PWRPIN_IN    PORTCbits.RC2
 #define EEPROM_PWRPIN_OUT   LATCbits.LATC2

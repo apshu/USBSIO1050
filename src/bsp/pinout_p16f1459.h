@@ -28,19 +28,19 @@ extern "C" {
 #define U1TX_IN             PORTBbits.RB7
 #define U1TX_OUT            LATBbits.LATB7
 #define U1TX_TRIS           TRISBbits.TRISB7
-#define COMMAND_IN          PORTAbits.RA4
+#define COMMAND_IN          PORTCbits.RC4
 #define COMMAND_OUT         do { #error "COMMAND pin is input only!" } while(0)
-#define COMMAND_TRIS        TRISAbits.TRISA4
-#define MOTOR_IN            PORTAbits.RA5
+#define COMMAND_TRIS        TRISCbits.TRISC4
+#define MOTOR_IN            PORTCbits.RC5
 #define MOTOR_OUT           do { #error "MOTOR pin is input only!" } while(0)
-#define MOTOR_TRIS          TRISAbits.TRISA5
+#define MOTOR_TRIS          TRISCbits.TRISC5
 #define READY_IN            PORTCbits.RC3
-#define READY_OUT           do { #error "MOTOR pin is input only!" } while(0)
+#define READY_OUT           do { #error "READY pin is input only!" } while(0)
 #define READY_TRIS          TRISCbits.TRISC3
 #define EEPROM_PWRPIN_IN    PORTCbits.RC2
 #define EEPROM_PWRPIN_OUT   LATCbits.LATC2
 #define EEPROM_PWRPIN_TRIS  TRISCbits.TRISC2
-#define mConfigureIOpins()  do { ANSELA = ANSELB = ANSELC = 0; nWPUEN = 0; WPUA = 0xFF; EEPROM_PWRPIN_OUT = 0; EEPROM_PWRPIN_TRIS = OUTPUT_PIN;} while(0)
+#define mConfigureIOpins()  do { ANSELA = ANSELB = ANSELC = 0; EEPROM_PWRPIN_OUT = 0; EEPROM_PWRPIN_TRIS = OUTPUT_PIN;} while(0)
 
 
 #ifdef	__cplusplus
