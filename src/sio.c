@@ -4,7 +4,18 @@
 #include "bsp/uart.h"
 #include "bsp/eeprom.h"
 
-#define SIO_IOBUFFER_LENGTH (300)
+#define SIO_IOBUFFER_LENGTH (128+5)
+
+/************************ Platform dependent start ************************/
+static inline void EEPROM_start5msTimer(void) {
+    OPTION_REG &= 0xC0; //TMR0 is configured for ~5ms timeout
+    OPTION_REGbits.PS = 7;
+    TMR0 = 0;
+    TMR1IF = 0;
+}
+
+#define EEPROM_is5msTimerExpired() (TMR1IF)
+/************************ Platform dependent end ************************/
 
 typedef enum {
     SIO_CMDACK = 'A',
@@ -54,11 +65,18 @@ typedef struct {
     uint8_t CSUM;
 } SIO_statusReply_t;
 
+typedef struct {
+    SIO_command_t SIOcmd;
+    uint8_t dataBytes[128];
+} SIO_indata128_t;
+
 static union {
-    uint8_t asBytes[128 + 5];
+    uint8_t asBytes[SIO_IOBUFFER_LENGTH];
     SIO_command_t asSIOcmd;
     SIO_commandReply_t as_R_reply;
     SIO_statusReply_t as_R_status;
+    SIO_indata128_t as_W_data;
+    SIO_indata128_t as_W_sector;
 } SIO_ioBuffer;
 
 static enum {
@@ -69,6 +87,7 @@ static enum {
     SIO_TASK_SEND_BUFFER,
     SIO_TASK_RECEIVE_BUFFER,
     SIO_TASK_WRITE_SECTOR,
+    SIO_TASK_WAIT_EEPROM,
 } SIO_task_state = SIO_TASK_WAIT_IDLE;
 
 uint_fast8_t SIO_byteCounter;
@@ -140,34 +159,36 @@ void SIO_task(void) {
             SIO_task_state = SIO_TASK_WAIT_IDLE;
             if (!COMMAND_isActive()) {
                 if (SIO_ioBuffer.asSIOcmd.cmdParams.DDEVIC == SIO_deviceID) {
-                    SIO_ioBuffer.as_R_status.cmdComplete = SIO_CMDNAK;
-                    SIO_task_state = SIO_TASK_SEND_BUFFER;
-                    SIO_bytesToCommunicate = 1;
-                    switch (SIO_ioBuffer.asSIOcmd.cmdParams.DCOMND) {
-                        case SIODEV1050_CMD_getStatus:
-                            putch(SIO_CMDACK); //Command acknowledged
-                            SIO_ioBuffer.as_R_status.cmdComplete = SIO_CMDCOMPLETE;
-                            SIO_ioBuffer.as_R_status.drvStatus = 0x80;
-                            SIO_ioBuffer.as_R_status.nWD2793Status = 0xFF;
-                            SIO_ioBuffer.as_R_status.formatTimeout = 0xE0;
-                            SIO_ioBuffer.as_R_status.WD2793Status = 0x00;
-                            SIO_ioBuffer.as_R_status.CSUM = 0x44;
-                            SIO_bytesToCommunicate = 6;
-                            SIO_byteCounter = 0;
-                            break;
-                        case SIODEV1050_CMD_readSector:
-                            putch(SIO_CMDACK); //Command acknowledged
-                            SIO_ioBuffer.as_R_reply.cmdComplete = EEPROM_read((uint_fast24_t)(SIO_ioBuffer.asSIOcmd.cmdParams.DAUX1 + (SIO_ioBuffer.asSIOcmd.cmdParams.DAUX2 << 8))<<7, SIO_ioBuffer.as_R_reply.dataBytes, 128) ? SIO_CMDCOMPLETE : SIO_CMDERROR;
-                            SIO_bytesToCommunicate = 130;
-                            SIO_byteCounter = 129;
-                            SIO_appendCSUM(); //SIO_byteCounter = 0; // as side effect to SIO_appendCSUM() call
-                            break;
-                        case SIODEV1050_CMD_writeSector:
-                            putch(SIO_CMDACK); //Command acknowledged
-                            SIO_bytesToCommunicate = 129;
-                            SIO_byteCounter = 0;
-                            SIO_task_state = SIO_TASK_RECEIVE_BUFFER;
-                            break;
+                    if (EEPROM_isDetected()) { //Reply only if EEPROM is available
+                        SIO_ioBuffer.as_R_status.cmdComplete = SIO_CMDNAK;
+                        SIO_task_state = SIO_TASK_SEND_BUFFER;
+                        SIO_bytesToCommunicate = 1;
+                        switch (SIO_ioBuffer.asSIOcmd.cmdParams.DCOMND) {
+                            case SIODEV1050_CMD_getStatus:
+                                putch(SIO_CMDACK); //Command acknowledged
+                                SIO_ioBuffer.as_R_status.cmdComplete = SIO_CMDCOMPLETE;
+                                SIO_ioBuffer.as_R_status.drvStatus = 0x80;
+                                SIO_ioBuffer.as_R_status.nWD2793Status = 0xFF;
+                                SIO_ioBuffer.as_R_status.formatTimeout = 0xE0;
+                                SIO_ioBuffer.as_R_status.WD2793Status = 0x00;
+                                SIO_ioBuffer.as_R_status.CSUM = 0x44;
+                                SIO_bytesToCommunicate = 6;
+                                SIO_byteCounter = 0;
+                                break;
+                            case SIODEV1050_CMD_readSector:
+                                putch(SIO_CMDACK); //Command acknowledged
+                                SIO_ioBuffer.as_R_reply.cmdComplete = EEPROM_read((uint_fast24_t)(SIO_ioBuffer.asSIOcmd.cmdParams.DAUX1 + (SIO_ioBuffer.asSIOcmd.cmdParams.DAUX2 << 8))<<7, SIO_ioBuffer.as_R_reply.dataBytes, 128) ? SIO_CMDCOMPLETE : SIO_CMDERROR;
+                                SIO_bytesToCommunicate = 130;
+                                SIO_byteCounter = 129;
+                                SIO_appendCSUM(); //SIO_byteCounter = 0; // as side effect to SIO_appendCSUM() call
+                                break;
+                            case SIODEV1050_CMD_writeSector:
+                                putch(SIO_CMDACK); //Command acknowledged
+                                SIO_bytesToCommunicate = 129;
+                                SIO_byteCounter = 0;
+                                SIO_task_state = SIO_TASK_RECEIVE_BUFFER;
+                                break;
+                        }
                     }
                 }
             }
@@ -194,9 +215,9 @@ void SIO_task(void) {
 
             if (UART_RxRdy()) {
                 if (SIO_bytesToCommunicate--) {
-                    SIO_ioBuffer.asBytes[SIO_byteCounter++] = UART_getch();
+                    SIO_ioBuffer.as_W_data.dataBytes[SIO_byteCounter++] = UART_getch();
                 } else {
-                    SIO_bytesToCommunicate = SIO_ioBuffer.asBytes[--SIO_byteCounter]; //CSUM - Reusing variable SIO_bytesToCommunicate
+                    SIO_bytesToCommunicate = SIO_ioBuffer.as_W_data.dataBytes[--SIO_byteCounter]; //CSUM - Reusing variable SIO_bytesToCommunicate
                     if (SIO_bytesToCommunicate == SIO_appendCSUM()) {
                         SIO_task_state = SIO_TASK_WRITE_SECTOR;
                     } else {
@@ -208,6 +229,31 @@ void SIO_task(void) {
             }
             break;
         case SIO_TASK_WRITE_SECTOR:
+            if (COMMAND_isActive()) {
+                SIO_task_state = SIO_TASK_WAIT_IDLE;
+                break;
+            }
+            SIO_ioBuffer.as_R_reply.cmdComplete = SIO_CMDERROR;
+            SIO_bytesToCommunicate = 1; //Byte counter == 0, as CSUM calculation side effect
+            if (EEPROM_write((uint_fast24_t) (SIO_ioBuffer.as_W_sector.SIOcmd.cmdParams.DAUX1 + (SIO_ioBuffer.as_W_sector.SIOcmd.cmdParams.DAUX2 << 8)) << 7, SIO_ioBuffer.as_W_sector.dataBytes, 128)) {
+                EEPROM_start5msTimer();
+                SIO_task_state = SIO_TASK_WAIT_EEPROM;
+            } else {
+                SIO_task_state = SIO_TASK_SEND_BUFFER;
+            }
+            break;
+        case SIO_TASK_WAIT_EEPROM:
+            if (COMMAND_isActive()) {
+                SIO_task_state = SIO_TASK_WAIT_IDLE;
+                break;
+            }
+            if (EEPROM_is5msTimerExpired()) {
+                SIO_task_state = SIO_TASK_SEND_BUFFER;
+            }
+            if (EEPROM_isDetected()) {
+                SIO_ioBuffer.as_R_reply.cmdComplete = SIO_CMDCOMPLETE;
+                SIO_task_state = SIO_TASK_SEND_BUFFER;
+            }
             break;
     }
 }
