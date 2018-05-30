@@ -18,6 +18,7 @@ extern "C" {
     void EEPROM_init(void);
     bool EEPROM_read(uint_fast24_t dataAddress, uint8_t *buf, uint_fast16_t numBytes);
     bool EEPROM_write(uint_fast24_t dataAddress, uint8_t *buf, uint_fast16_t numBytes);
+    static bool inline EEPROM_isDetected() {return EEPROM_write(0,(void*)0,0);}
 
 #ifdef	__cplusplus
 }
