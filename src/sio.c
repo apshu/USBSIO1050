@@ -48,9 +48,9 @@ typedef struct {
 typedef struct {
     uint8_t cmdComplete;
     uint8_t drvStatus;
-    uint8_t nWD2793Status1;
+    uint8_t nWD2793Status;
     uint8_t formatTimeout;
-    uint8_t nWD2793Status2;
+    uint8_t WD2793Status;
     uint8_t CSUM;
 } SIO_statusReply_t;
 
@@ -147,17 +147,17 @@ void SIO_task(void) {
                         case SIODEV1050_CMD_getStatus:
                             putch(SIO_CMDACK); //Command acknowledged
                             SIO_ioBuffer.as_R_status.cmdComplete = SIO_CMDCOMPLETE;
-                            SIO_ioBuffer.as_R_status.drvStatus = 0x00;
-                            SIO_ioBuffer.as_R_status.nWD2793Status1 = 0xFF;
+                            SIO_ioBuffer.as_R_status.drvStatus = 0x80;
+                            SIO_ioBuffer.as_R_status.nWD2793Status = 0xFF;
                             SIO_ioBuffer.as_R_status.formatTimeout = 0xE0;
-                            SIO_ioBuffer.as_R_status.nWD2793Status2 = 0xFF;
+                            SIO_ioBuffer.as_R_status.WD2793Status = 0x00;
                             SIO_ioBuffer.as_R_status.CSUM = 0x44;
                             SIO_bytesToCommunicate = 6;
                             SIO_byteCounter = 0;
                             break;
                         case SIODEV1050_CMD_readSector:
                             putch(SIO_CMDACK); //Command acknowledged
-                            SIO_ioBuffer.as_R_reply.cmdComplete = EEPROM_read(SIO_ioBuffer.asSIOcmd.cmdParams.DAUX1 + (SIO_ioBuffer.asSIOcmd.cmdParams.DAUX2 << 8), SIO_ioBuffer.as_R_reply.dataBytes, 128) ? SIO_CMDCOMPLETE : SIO_CMDERROR;
+                            SIO_ioBuffer.as_R_reply.cmdComplete = EEPROM_read((uint_fast24_t)(SIO_ioBuffer.asSIOcmd.cmdParams.DAUX1 + (SIO_ioBuffer.asSIOcmd.cmdParams.DAUX2 << 8))<<7, SIO_ioBuffer.as_R_reply.dataBytes, 128) ? SIO_CMDCOMPLETE : SIO_CMDERROR;
                             SIO_bytesToCommunicate = 130;
                             SIO_byteCounter = 129;
                             SIO_appendCSUM(); //SIO_byteCounter = 0; // as side effect to SIO_appendCSUM() call
