@@ -24,12 +24,12 @@ limitations under the License.
 
 // semantic versioning
 #define MAJOR   1       // change only when incompatible changes are made
-#define MINOR   2       // change when adding functionality or fixing bugs
+#define MINOR   0       // change when adding functionality or fixing bugs
 
 // this release date
-#define YEAR            2017
-#define MONTH           8       // January=1, February=2 ..
-#define DAY             9       // Day:1..31
+#define YEAR            2018
+#define MONTH           6       // January=1, February=2 ..
+#define DAY             1       // Day:1..31
 
 #define MAIN_RETURN void
 
