@@ -113,7 +113,7 @@ void VolumeBootRecordGet( uint8_t * buffer, uint8_t seg)
     if ( 0 == seg ) {       // segment from 000 to 0x03f
         memcpy((void*)buffer, (void*)VBR_seg0, sizeof(VBR_seg0));
         // Volume Label (11 bytes)
-        memcpy( (void*)&buffer[ 0x02b], (void*)"CLICKBOARD ", 11);
+        memcpy( (void*)&buffer[ 0x02b], (void*)"EEPSIO2USB ", 11);
         // FAT system ( 8 bytes)
         memcpy( (void*)&buffer[ 0x036], (void*)"FAT12   ", 8);
     }
@@ -146,7 +146,7 @@ void FATRecordGet( uint8_t * buffer, uint8_t seg)
         buffer[1] = 0xFF;
         buffer[2] = 0xFF;
         buffer[3] = 0xFF;       // 2 - first/last cluster in short file chain
-        buffer[4] = 0x0F;      // readme.htm
+        buffer[4] = 0x0F;      // DRIVER.htm
     }
 }
 
@@ -166,7 +166,7 @@ uint8_t readme_size( void) {
 
 const uint8_t entry0[ ROOT_ENTRY_SIZE] = {
     // Drive Name (11 characters, padded with spaces)
-    'C','L','I','C','K','B','O','A','R','D',' ',
+    'E','E','P','S','I','O','2','U','S','B',' ',
     0x08,                       // Specify this entry as a volume label
     0x00,                       // Reserved
 
