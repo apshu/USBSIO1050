@@ -14,11 +14,16 @@ extern "C" {
 
 #define EEPROM_I2C_ADDRESS  0xA0 
 #define EEPROM_PAGE_BYTES   (256)
-    
+#define EEPROM_is5msTimerExpired() (TMR0IF)     //Platform dependent code
+
+    void EEPROM_start5msTimer(void);
     void EEPROM_init(void);
     bool EEPROM_read(uint_fast24_t dataAddress, uint8_t *buf, uint_fast16_t numBytes);
     bool EEPROM_write(uint_fast24_t dataAddress, uint8_t *buf, uint_fast16_t numBytes);
-    static bool inline EEPROM_isDetected() {return EEPROM_write(0,(void*)0,0);}
+
+    static bool inline EEPROM_isDetected() {
+        return EEPROM_write(0, (void*) 0, 0);
+    }
 
 #ifdef	__cplusplus
 }
