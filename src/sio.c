@@ -6,17 +6,6 @@
 
 #define SIO_IOBUFFER_LENGTH (128+5)
 
-/************************ Platform dependent start ************************/
-static inline void EEPROM_start5msTimer(void) {
-    OPTION_REG &= 0xC0; //TMR0 is configured for ~5ms timeout
-    OPTION_REGbits.PS = 7;
-    TMR0 = 0;
-    TMR1IF = 0;
-}
-
-#define EEPROM_is5msTimerExpired() (TMR1IF)
-/************************ Platform dependent end ************************/
-
 typedef enum {
     SIO_CMDACK = 'A',
     SIO_CMDNAK = 'N',
@@ -177,7 +166,7 @@ void SIO_task(void) {
                                 break;
                             case SIODEV1050_CMD_readSector:
                                 putch(SIO_CMDACK); //Command acknowledged
-                                SIO_ioBuffer.as_R_reply.cmdComplete = EEPROM_read((uint_fast24_t)(SIO_ioBuffer.asSIOcmd.cmdParams.DAUX1 + (SIO_ioBuffer.asSIOcmd.cmdParams.DAUX2 << 8))<<7, SIO_ioBuffer.as_R_reply.dataBytes, 128) ? SIO_CMDCOMPLETE : SIO_CMDERROR;
+                                SIO_ioBuffer.as_R_reply.cmdComplete = EEPROM_read((uint_fast24_t)((SIO_ioBuffer.asSIOcmd.cmdParams.DAUX1 + (SIO_ioBuffer.asSIOcmd.cmdParams.DAUX2 << 8))<<7)+16, SIO_ioBuffer.as_R_reply.dataBytes, 128) ? SIO_CMDCOMPLETE : SIO_CMDERROR;
                                 SIO_bytesToCommunicate = 130;
                                 SIO_byteCounter = 129;
                                 SIO_appendCSUM(); //SIO_byteCounter = 0; // as side effect to SIO_appendCSUM() call
@@ -235,7 +224,7 @@ void SIO_task(void) {
             }
             SIO_ioBuffer.as_R_reply.cmdComplete = SIO_CMDERROR;
             SIO_bytesToCommunicate = 1; //Byte counter == 0, as CSUM calculation side effect
-            if (EEPROM_write((uint_fast24_t) (SIO_ioBuffer.as_W_sector.SIOcmd.cmdParams.DAUX1 + (SIO_ioBuffer.as_W_sector.SIOcmd.cmdParams.DAUX2 << 8)) << 7, SIO_ioBuffer.as_W_sector.dataBytes, 128)) {
+            if (EEPROM_write((uint_fast24_t) ((SIO_ioBuffer.as_W_sector.SIOcmd.cmdParams.DAUX1 + (SIO_ioBuffer.as_W_sector.SIOcmd.cmdParams.DAUX2 << 8)) << 7)+16, SIO_ioBuffer.as_W_sector.dataBytes, 128)) {
                 EEPROM_start5msTimer();
                 SIO_task_state = SIO_TASK_WAIT_EEPROM;
             } else {
