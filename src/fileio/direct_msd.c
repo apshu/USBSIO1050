@@ -22,6 +22,7 @@ limitations under the License.
 #include "fileio.h"
 #include "direct_msd.h"
 #include "static_filesys.h"
+#include "bsp/eeprom.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -39,8 +40,18 @@ bool ParseHex(char c);
  * Output:          true   - Card detected
  *                  false   - No card detected
  *****************************************************************************/
+bit DIRECT_mediaDetectCache = 0;
+
 uint8_t DIRECT_MediaDetect(void* config) {
-    return true;
+    if (PIR1bits.TMR1IF) {
+        //900msec
+        TMR1H = 0x89;
+        TMR1L = 0x54;
+        // Clearing IF flag.
+        PIR1bits.TMR1IF = 0;
+        DIRECT_mediaDetectCache = EEPROM_isDetected();
+    }
+    return DIRECT_mediaDetectCache;
 }//end MediaDetect
 
 /******************************************************************************
@@ -294,7 +305,11 @@ bool ParseHex(char c) {
                 // chksum is good
                 state = SOL;
                 if (record_type == 0) {
-                    //                    LVP_packRow( ext_address + address, data, data_count);
+                    while (!(EEPROM_isDetected() || EEPROM_is5msTimerExpired())) {
+                        continue;
+                    }
+                    EEPROM_write(ext_address + address, data, data_count);
+                    EEPROM_start5msTimer();
                 } else {
                     if (record_type == 4) {
                         ext_address = ((uint32_t) (data[0]) << 24) + ((uint32_t) (data[1]) << 16);
@@ -313,4 +328,18 @@ bool ParseHex(char c) {
             break;
     }
     return true;
+}
+
+void DIRECT_Initialize(void) {
+    //Set the Timer to the options selected in the GUI
+    //T1GSS T1G_pin; TMR1GE disabled; T1GTM disabled; T1GPOL low; T1GGO_nDONE done; T1GSPM disabled; 
+    T1GCON = 0x00;
+    //1sec
+    TMR1H = 0x86;
+    TMR1L = 0xE8;
+    // Clearing IF flag.
+    PIR1bits.TMR1IF = 0;
+    // T1CKPS 1:1; T1OSCEN disabled; nT1SYNC do_not_synchronize; TMR1CS LFINTOSC; TMR1ON enabled; 
+    T1CON = 0xC5;
+    DIRECT_mediaDetectCache = EEPROM_isDetected();
 }

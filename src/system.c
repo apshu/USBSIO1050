@@ -24,6 +24,7 @@ limitations under the License.
 #include "fileio/fileio.h"
 #include "bsp/uart.h"
 #include "bsp/eeprom.h"
+#include "fileio/direct_msd.h"
 
 /*********************************************************************
  * Function: void SYSTEM_Initialize( SYSTEM_STATE state )
@@ -44,6 +45,7 @@ void SYSTEM_init(void) {
     UART_init();
     EEPROM_init();
     USBDeviceInit(); //usb_device.c.  Initializes USB module SFRs and firmware
+    DIRECT_Initialize();
     //variables to known states.
 }
 
