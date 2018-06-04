@@ -64,27 +64,27 @@ void EEPROM_init(void) {
 //If buf == null, numBytes == 0, check if EEPROM acknowledges it's I2C address
 
 static bool EEPROM_writeNoStop(uint_fast24_t dataAddress, uint8_t *buf, uint_fast16_t numBytes) {
-    if (SSP1CON1 == 0x28) {
-        EEPROM_start5msTimer();
-        SSP1CON2bits.SEN = 1;
-        dataAddress &= (uint_fast24_t) ((1UL << 18UL) - 1UL);
-        uint_fast8_t dout = (dataAddress >> 16) & 0xFF;
-        dout <<= 1;
-        dout |= EEPROM_I2C_ADDRESS & 0xFF; //Device address for Write
-        while (SSP1CON2bits.SEN) {
-            if (EEPROM_is5msTimerExpired()) {
-                return false;
+    if (numBytes + (dataAddress & (EEPROM_PAGE_BYTES - 1)) <= EEPROM_PAGE_BYTES) {
+        //Not crossing page boundary
+        if (SSP1CON1 == 0x28) {
+            EEPROM_start5msTimer();
+            SSP1CON2bits.SEN = 1;
+            dataAddress &= (uint_fast24_t) ((1UL << 18UL) - 1UL);
+            uint_fast8_t dout = (dataAddress >> 16) & 0xFF;
+            dout <<= 1;
+            dout |= EEPROM_I2C_ADDRESS & 0xFF; //Device address for Write
+            while (SSP1CON2bits.SEN) {
+                if (EEPROM_is5msTimerExpired()) {
+                    return false;
+                }
             }
-        }
-        if (EEPROM_sendAbyte(dout)) {
-            if (numBytes) {
-                if (EEPROM_sendAbyte(dataAddress >> 8)) {
-                    if (EEPROM_sendAbyte(dataAddress)) {
-                        //Address set correctly
-                        if (buf) {
-                            //We want to send something
-                            if (numBytes + (dataAddress & (EEPROM_PAGE_BYTES - 1)) <= EEPROM_PAGE_BYTES) {
-                                //Not crossing page boundary
+            if (EEPROM_sendAbyte(dout)) {
+                if (numBytes) {
+                    if (EEPROM_sendAbyte(dataAddress >> 8)) {
+                        if (EEPROM_sendAbyte(dataAddress)) {
+                            //Address set correctly
+                            if (buf) {
+                                //We want to send something
                                 for (; numBytes; --numBytes) {
                                     if (!EEPROM_sendAbyte(*buf++)) {
                                         //ACK error, STOP already sent, write might happen
@@ -94,15 +94,15 @@ static bool EEPROM_writeNoStop(uint_fast24_t dataAddress, uint8_t *buf, uint_fas
                                 }
                                 //Written
                                 return true;
+                            } else {
+                                //Nothing to send, address correctly received by the device
+                                return true;
                             }
-                        } else {
-                            //Nothing to send, address correctly received by the device
-                            return true;
                         }
                     }
+                } else {
+                    return true;
                 }
-            } else {
-                return true;
             }
         }
     }
