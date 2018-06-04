@@ -217,7 +217,7 @@ bool ParseHex(char c) {
                 data_count = (data_count << 4) + c;
                 checksum += data_count;
                 bc = 0;
-                if (data_count > 16) {
+                if (data_count > sizeof(data)) {
                     state = SOL;
                     return false;
                 }
