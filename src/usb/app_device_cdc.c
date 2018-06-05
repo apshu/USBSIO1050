@@ -43,6 +43,8 @@ unsigned char LastRS232Out; // Number of characters in the buffer
 unsigned char RS232cp; // current position within the buffer
 unsigned char RS232_Out_Data_Rdy = 0;
 
+static bit APP_configModeActive;
+
 /*********************************************************************
  * Function: void APP_DeviceCDCEmulatorInitialize(void);
  * Overview: Initializes the demo code
@@ -53,7 +55,7 @@ void APP_DeviceCDCEmulatorInitialize() {
     line_coding.bDataBits = 8;
     line_coding.bParityType = 0;
     line_coding.dwDTERate = 19200UL;
-
+    APP_configModeActive = 0;
     UART_init();
 
     // 	 Initialize the arrays !!!
@@ -126,7 +128,7 @@ void APP_DeviceCDCEmulatorTasks() {
             putUSBUSART(&USB_Out_Buffer[0], NextUSBOut);
             NextUSBOut = 0;
         } else {
-            
+
         }
     }
 
@@ -144,13 +146,34 @@ void APP_DeviceCDCEmulatorTasks() {
 #if defined(USB_CDC_SET_LINE_CODING_HANDLER)
 
 void APP_SetLineCodingHandler(void) {
+    APP_configModeActive = 0; /* Assume we do not activate the config mode */
     //Update the baudrate info in the CDC driver
     CDCSetBaudRate(cdc_notice.GetLineCoding.dwDTERate);
-    if (cdc_notice.GetLineCoding.dwDTERate <= 4800) {
-        /* Force bootloader */
+    if (cdc_notice.GetLineCoding.dwDTERate <= 1200) {
+        /* Set tape speed = 600 baud */
+        UART_baud600();
     } else {
-        if (cdc_notice.GetLineCoding.dwDTERate <= 115200) {
-            /* Reset analyzer device to force autodetection */
+        if (cdc_notice.GetLineCoding.dwDTERate <= 19200) {
+            /* Set UART to 19200 1x speed */
+            UART_baud19200();
+        } else {
+            if (cdc_notice.GetLineCoding.dwDTERate <= 38400) {
+                /* Set UART to 38400 2x speed */
+                UART_baud38400();
+            } else {
+                if (cdc_notice.GetLineCoding.dwDTERate <= 57600) {
+                    /* Set UART to 57600 3x speed */
+                    UART_baud57600();
+                } else {
+                    if (cdc_notice.GetLineCoding.dwDTERate >= 115200) {
+                        /* Config mode active */
+                        APP_configModeActive = 1;
+                    } else {
+                        /* Reset UART to 19200 1x speed */
+                        UART_init();
+                    }
+                }
+            }
         }
     }
 }

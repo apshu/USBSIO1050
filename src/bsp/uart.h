@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-*******************************************************************************/
+ *******************************************************************************/
 
 #ifndef USART_H
 #define USART_H
@@ -28,12 +28,17 @@ limitations under the License.
 #define UART_ENABLE   RCSTAbits.SPEN
 
 #define UART_TxRdy()    (PIR1bits.TXIF )
+#define UART_baud600() do { SPBRG = 0x1F; SPBRGH = 0x4E; /* 48MHz -> 600 baud */ } while(0)
+#define UART_baud19200() do { SPBRG = 0x70; SPBRGH = 0x02; /* 48MHz -> 19200 baud */ } while(0)
+#define UART_baud38400() do { SPBRG = 0x38; SPBRGH = 0x01; /* 48MHz -> 38400 baud */ } while(0)
+#define UART_baud57600() do { SPBRG = 0xCF; SPBRGH = 0x00; /* 48MHz -> 57600 baud */ } while(0)
+
 bit UART_RxRdy(void);
 void UART_poll(void);
 /*********************************************************************
-* Function: void UART_init(void);
-* Overview: Initializes USART (RS-232 port)
-********************************************************************/
+ * Function: void UART_init(void);
+ * Overview: Initializes USART (RS-232 port)
+ ********************************************************************/
 void UART_init(void);
 void UART_enable(void);
 void UART_disable(void);
