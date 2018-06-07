@@ -66,7 +66,7 @@ void EEPROM_init(void) {
 static bool EEPROM_writeNoStop(uint_fast24_t dataAddress, uint8_t *buf, uint_fast16_t numBytes) {
     if (numBytes + (dataAddress & (EEPROM_PAGE_BYTES - 1)) <= EEPROM_PAGE_BYTES) {
         //Not crossing page boundary
-        if (SSP1CON1 == 0x28) {
+        if ((SSP1CON1 == 0x28) && EEPROM_isPowered()) {
             EEPROM_start5msTimer();
             SSP1CON2bits.SEN = 1;
             dataAddress &= (uint_fast24_t) ((1UL << 18UL) - 1UL);

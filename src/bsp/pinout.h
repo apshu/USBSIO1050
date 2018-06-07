@@ -41,6 +41,7 @@
 
 #define EEPROM_powerOff()   do { EEPROM_PWRPIN_OUT = 0; EEPROM_PWRPIN_TRIS = OUTPUT_PIN; } while (0)
 #define EEPROM_powerOn()    do { EEPROM_PWRPIN_OUT = 1; EEPROM_PWRPIN_TRIS = OUTPUT_PIN; } while (0)
+#define EEPROM_isPowered()  (EEPROM_PWRPIN_IN)
 
 #endif	/* PINOUT_H */
 
