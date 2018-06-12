@@ -512,10 +512,6 @@ typedef struct
     uint8_t  (*SectorWrite)(void * config, uint32_t sector_addr, uint8_t* buffer, uint8_t seg);
     // Pointer to a media-specific parameter structure
     void * mediaParameters;
-    // Function pointer to the async write tasks function of the physical media being used.
-    uint8_t  (*AsyncWriteTasks)(void* config, void* pAsyncIO);
-    // Function pointer to the async read tasks function of the physical media being used.
-    uint8_t  (*AsyncReadTasks)(void* config, void* pAsyncIO);
 } LUN_FUNCTIONS;
 
 /** Section: Externs *********************************************************/
