@@ -38,6 +38,7 @@
 #define mInitCDPin()        do {  } while (0)
 #define COMMAND_isActive()  ( !COMMAND_IN )
 #define MOTOR_isActive()    ( !MOTOR_IN )
+#define HOSTATR_isReady()   ( READY_IN )
 
 #define EEPROM_powerOff()   do { EEPROM_PWRPIN_OUT = 0; EEPROM_PWRPIN_TRIS = OUTPUT_PIN; } while (0)
 #define EEPROM_powerOn()    do { EEPROM_PWRPIN_OUT = 1; EEPROM_PWRPIN_TRIS = OUTPUT_PIN; } while (0)
