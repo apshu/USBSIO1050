@@ -108,10 +108,15 @@ uint8_t DIRECT_SectorRead(void* config, uint32_t sector_addr, uint8_t* buffer, u
         memset(buffer, '\0', MSD_IN_EP_SIZE); // empty buffer
         if (4 == sector_addr) {
             // Service README.HTM
-            if (seg < ((readme_size() + 63) % 64))
+            if (seg < ((readme_size() + MSD_IN_EP_SIZE - 1) / MSD_IN_EP_SIZE)) {
                 strncpy((void*) buffer,
-                    (void*) &readme[seg * 64],
-                    64); // at most 64 bytes at a time
+                        (void*) &readme[seg * MSD_IN_EP_SIZE],
+                        MSD_IN_EP_SIZE); // at most 64 bytes at a time
+            }
+        } else {
+            if ((sector_addr >= 0x14UL) && (sector_addr < (EEPROM_BYTE_SIZE / FILEIO_CONFIG_MEDIA_SECTOR_SIZE + 0x14UL))) {
+                return EEPROM_read((sector_addr - 0x14UL) * FILEIO_CONFIG_MEDIA_SECTOR_SIZE + seg * MSD_IN_EP_SIZE, buffer, MSD_IN_EP_SIZE);
+            }
         }
     }
     return true;
@@ -125,22 +130,24 @@ uint8_t DIRECT_SectorRead(void* config, uint32_t sector_addr, uint8_t* buffer, u
  * Output:          Returns true if write successful, false otherwise
  *****************************************************************************/
 uint8_t DIRECT_SectorWrite(void* config, uint32_t sector_addr, uint8_t* buffer, uint8_t seg) {
-    if ((sector_addr < 2) || (sector_addr >= DRV_TOTAL_DISK_SIZE)) {
+    if ((sector_addr < 2UL) || (sector_addr >= DRV_TOTAL_DISK_SIZE)) {
         return false;
     }
-    if (2 == sector_addr) { // updating the FAT table - RAM
+    if (2UL == sector_addr) { // updating the FAT table - RAM
         FATRecordSet(buffer, seg); // update the RAM (fabricated) image
         return true;
     }
-    if (3 == sector_addr) { // update of the root directory
+    if (3UL == sector_addr) { // update of the root directory
         RootRecordSet(buffer, seg);
         return true;
     }
-
-    // all remaining data sectors are parsed and programmed directly into the device
-    uint8_t i = 0;
-    while ((i++ < 64) && ParseHex(*buffer++));
-
+    if ((sector_addr >= 0x14UL) && (sector_addr < (EEPROM_BYTE_SIZE / FILEIO_CONFIG_MEDIA_SECTOR_SIZE + 0x14UL))) {
+        return EEPROM_write((sector_addr - 0x14UL) * FILEIO_CONFIG_MEDIA_SECTOR_SIZE + seg * MSD_OUT_EP_SIZE, buffer, MSD_OUT_EP_SIZE);
+    } else {
+        // all remaining data sectors are parsed and programmed directly into the device
+        uint8_t i = 0;
+        while ((i++ < 64) && ParseHex(*buffer++));
+    }
     return true;
 } // SectorWrite
 
@@ -193,7 +200,7 @@ bool ParseHex(char c) {
     static uint32_t ext_address = 0;
     static uint8_t checksum;
     static uint8_t record_type;
-    static uint8_t data_byte, data_index, data[16];
+    static uint8_t data_byte, data_index, data[64];
 
     switch (state) {
         case SOL:
@@ -217,7 +224,7 @@ bool ParseHex(char c) {
                 data_count = (data_count << 4) + c;
                 checksum += data_count;
                 bc = 0;
-                if (data_count > sizeof(data)) {
+                if (data_count > sizeof (data)) {
                     state = SOL;
                     return false;
                 }
@@ -309,7 +316,6 @@ bool ParseHex(char c) {
                         continue;
                     }
                     EEPROM_write(ext_address + address, data, data_count);
-                    EEPROM_start5msTimer();
                 } else {
                     if (record_type == 4) {
                         ext_address = ((uint32_t) (data[0]) << 24) + ((uint32_t) (data[1]) << 16);
