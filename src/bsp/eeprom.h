@@ -12,9 +12,10 @@
 extern "C" {
 #endif
 
-#define EEPROM_I2C_ADDRESS  0xA0 
-#define EEPROM_PAGE_BYTES   (256)
+#define EEPROM_I2C_ADDRESS         (0xA0)
+#define EEPROM_PAGE_BYTES          (256)
 #define EEPROM_is5msTimerExpired() (TMR0IF)     //Platform dependent code
+#define EEPROM_BYTE_SIZE           (2*1024UL*1024UL/8UL)
 
     void EEPROM_start5msTimer(void);
     void EEPROM_init(void);

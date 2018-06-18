@@ -58,7 +58,7 @@ limitations under the License.
 //--------------------------------------------------------------------------
 // Number of Sectors per Cluster
 //--------------------------------------------------------------------------
-#define DRV_SECTORS_PER_CLUSTER     8           // * 512 byte = cluster size (4kB)
+#define DRV_SECTORS_PER_CLUSTER     16           // * 512 byte = cluster size (8kB)
 
 //--------------------------------------------------------------------------
 // Maximum files supported
