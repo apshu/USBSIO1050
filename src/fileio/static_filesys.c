@@ -147,6 +147,7 @@ static uint_fast8_t FATclusterByte(uint_fast16_t cluster1, uint_fast16_t cluster
         case 2:
             return (cluster2 >> 4) & 0xFF;
     }
+    return 0;
 }
 
 void FATRecordGet(uint8_t * buffer, uint8_t seg) {
