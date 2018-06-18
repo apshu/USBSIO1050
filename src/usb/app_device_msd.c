@@ -25,29 +25,6 @@ limitations under the License.
 
 #include "fileio/direct_msd.h"
 
-
-//The LUN variable definition is critical to the MSD function driver.  This
-//  array is a structure of function pointers that are the functions that
-//  will take care of each of the physical media.  For each additional LUN
-//  that is added to the system, an entry into this array needs to be added
-//  so that the stack can know where to find the physical layer functions.
-//  In this example the media initialization function is named
-//  "MediaInitialize", the read capacity function is named "ReadCapacity",
-//  etc.
-LUN_FUNCTIONS LUN[MAX_LUN + 1] =
-{
-    {
-        (FILEIO_MEDIA_INFORMATION* (*)(void *))&DIRECT_MediaInitialize,
-        (uint32_t (*)(void *))&DIRECT_CapacityRead,
-        (uint16_t (*)(void *))&DIRECT_SectorSizeRead,
-        (bool  (*)(void *))&DIRECT_MediaDetect,
-        (uint8_t  (*)(void *, uint32_t, uint8_t*, uint8_t))&DIRECT_SectorRead,
-        (uint8_t  (*)(void *))&DIRECT_WriteProtectStateGet,
-        (uint8_t  (*)(void *, uint32_t, uint8_t*, uint8_t))&DIRECT_SectorWrite,
-        (void *)NULL
-    }
-};
-
 /* Standard Response to INQUIRY command stored in ROM 	*/
 const InquiryResponse inq_resp = {
 	0x00,		// peripheral device is connected, direct access block device
@@ -77,7 +54,7 @@ const InquiryResponse inq_resp = {
 * Output: None
 *
 ********************************************************************/
-void APP_DeviceMSDInitialize()
+void APP_DeviceMSDInitialize(void)
 {
     #if (MSD_DATA_IN_EP == MSD_DATA_OUT_EP)
         USBEnableEndpoint(MSD_DATA_IN_EP,USB_IN_ENABLED|USB_OUT_ENABLED|USB_HANDSHAKE_ENABLED|USB_DISALLOW_SETUP);
@@ -103,7 +80,7 @@ void APP_DeviceMSDInitialize()
 * Output: None
 *
 ********************************************************************/
-void APP_DeviceMSDTasks()
+void APP_DeviceMSDTasks(void)
 {
     MSDTasks();
 }

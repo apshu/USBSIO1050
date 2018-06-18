@@ -18,13 +18,13 @@ limitations under the License.
 #include "fileio/fileio_config.h"
 #include "fileio/fileio.h"
 
-uint8_t DIRECT_MediaDetect(void* config);
-FILEIO_MEDIA_INFORMATION * DIRECT_MediaInitialize(void* config);
-uint8_t DIRECT_SectorRead(void* config, uint32_t sector_addr, uint8_t* buffer, uint8_t seg);
-uint8_t DIRECT_SectorWrite(void* config, uint32_t sector_addr, uint8_t* buffer, uint8_t seg);
-uint16_t DIRECT_SectorSizeRead(void* config);
-uint32_t DIRECT_CapacityRead(void* config);
-uint8_t DIRECT_WriteProtectStateGet(void* config);
+uint8_t DIRECT_MediaDetect(void);
+FILEIO_MEDIA_INFORMATION * DIRECT_MediaInitialize(void);
+uint8_t DIRECT_SectorRead(uint32_t sector_addr, uint8_t* buffer, uint8_t seg);
+uint8_t DIRECT_SectorWrite(uint32_t sector_addr, uint8_t* buffer, uint8_t seg);
+uint16_t DIRECT_SectorSizeRead(void);
+uint32_t DIRECT_CapacityRead(void);
+uint8_t DIRECT_WriteProtectStateGet(void);
 
 void DIRECT_Initialize(void);
 

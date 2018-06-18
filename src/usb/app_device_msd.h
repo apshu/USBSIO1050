@@ -27,7 +27,7 @@ limitations under the License.
 * Output: None
 *
 ********************************************************************/
-void APP_DeviceMSDInitialize();
+void APP_DeviceMSDInitialize(void);
 
 /*********************************************************************
 * Function: void APP_DeviceMSDTasks(void);
@@ -43,4 +43,4 @@ void APP_DeviceMSDInitialize();
 * Output: None
 *
 ********************************************************************/
-void APP_DeviceMSDTasks();
+void APP_DeviceMSDTasks(void);

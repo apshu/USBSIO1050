@@ -40,7 +40,7 @@ MAIN_RETURN main(void) {
         SYSTEM_Tasks();
         UART_poll();
         SIO_task();
-        
+
 #if defined(USB_POLLING)
         USBDeviceTasks();
 #endif
@@ -61,7 +61,7 @@ MAIN_RETURN main(void) {
         }
 
         //Application specific tasks
-        APP_DeviceMSDTasks();
+        MSDTasks();
         APP_DeviceCDCEmulatorTasks();
 
     }//end while

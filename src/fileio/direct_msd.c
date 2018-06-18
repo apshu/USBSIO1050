@@ -42,7 +42,7 @@ bool ParseHex(char c);
  *****************************************************************************/
 bit DIRECT_mediaDetectCache = 0;
 
-uint8_t DIRECT_MediaDetect(void* config) {
+uint8_t DIRECT_MediaDetect(void) {
     if (PIR1bits.TMR1IF) {
         //900msec
         TMR1H = 0x89;
@@ -60,7 +60,7 @@ uint8_t DIRECT_MediaDetect(void* config) {
  * Input:           void
  * Output:          uint16_t - size of the sectors for this physical media.
  *****************************************************************************/
-uint16_t DIRECT_SectorSizeRead(void* config) {
+uint16_t DIRECT_SectorSizeRead(void) {
     return FILEIO_CONFIG_MEDIA_SECTOR_SIZE;
 }
 
@@ -72,7 +72,7 @@ uint16_t DIRECT_SectorSizeRead(void* config) {
  *                  Ex: In other words, this function returns the last valid
  *                  LBA address that may be read/written to.
  *****************************************************************************/
-uint32_t DIRECT_CapacityRead(void* config) {
+uint32_t DIRECT_CapacityRead(void) {
     return ((uint32_t) DRV_TOTAL_DISK_SIZE - 1);
 }
 
@@ -82,7 +82,7 @@ uint32_t DIRECT_CapacityRead(void* config) {
  * Output:          Returns a pointer to a MEDIA_INFORMATION structure
  * Overview:        MediaInitialize initializes the media card and supporting variables.
  *****************************************************************************/
-FILEIO_MEDIA_INFORMATION * DIRECT_MediaInitialize(void* config) {
+FILEIO_MEDIA_INFORMATION * DIRECT_MediaInitialize(void) {
     mediaInformation.validityFlags.bits.sectorSize = true;
     mediaInformation.sectorSize = FILEIO_CONFIG_MEDIA_SECTOR_SIZE;
     mediaInformation.errorCode = MEDIA_NO_ERROR;
@@ -96,7 +96,7 @@ FILEIO_MEDIA_INFORMATION * DIRECT_MediaInitialize(void* config) {
  *             seg         - 64-byte segment of a sector
  * Output:     Returns true if read successful, false otherwise
  *****************************************************************************/
-uint8_t DIRECT_SectorRead(void* config, uint32_t sector_addr, uint8_t* buffer, uint8_t seg) {
+uint8_t DIRECT_SectorRead(uint32_t sector_addr, uint8_t* buffer, uint8_t seg) {
     // Read a sector worth of data, and copy it to the specified RAM "buffer"
     if (0 == sector_addr) MasterBootRecordGet(buffer, seg);
     else if (1 == sector_addr) VolumeBootRecordGet(buffer, seg);
@@ -129,7 +129,7 @@ uint8_t DIRECT_SectorRead(void* config, uint32_t sector_addr, uint8_t* buffer, u
  *                  seg         - 64-byte segment of a 512 sector
  * Output:          Returns true if write successful, false otherwise
  *****************************************************************************/
-uint8_t DIRECT_SectorWrite(void* config, uint32_t sector_addr, uint8_t* buffer, uint8_t seg) {
+uint8_t DIRECT_SectorWrite(uint32_t sector_addr, uint8_t* buffer, uint8_t seg) {
     if ((sector_addr < 2UL) || (sector_addr >= DRV_TOTAL_DISK_SIZE)) {
         return false;
     }
@@ -155,7 +155,7 @@ uint8_t DIRECT_SectorWrite(void* config, uint32_t sector_addr, uint8_t* buffer, 
  * Function:        uint8_t WriteProtectState(void)
  * Output:          uint8_t    - Returns always false (never protected)
  *****************************************************************************/
-uint8_t DIRECT_WriteProtectStateGet(void* config) {
+uint8_t DIRECT_WriteProtectStateGet(void) {
     return false;
 }
 

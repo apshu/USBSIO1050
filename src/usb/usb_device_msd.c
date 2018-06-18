@@ -25,6 +25,7 @@ please contact mla_licensing@microchip.com
 #include "bsp/system_config.h"
 
 #include "usb/usb_device_msd.h"
+#include "fileio/direct_msd.h"
 
 #ifdef USB_USE_MSD
 
@@ -33,15 +34,14 @@ please contact mla_licensing@microchip.com
 #else
     #define LUN_INDEX gblCBW.bCBWLUN
 #endif
-
-extern LUN_FUNCTIONS LUN[MAX_LUN + 1];
-#define LUNMediaInitialize()                LUN[LUN_INDEX].MediaInitialize(LUN[LUN_INDEX].mediaParameters)
-#define LUNReadCapacity()                   LUN[LUN_INDEX].ReadCapacity(LUN[LUN_INDEX].mediaParameters)
-#define LUNReadSectorSize()                 LUN[LUN_INDEX].ReadSectorSize(LUN[LUN_INDEX].mediaParameters)
-#define LUNMediaDetect()                    LUN[LUN_INDEX].MediaDetect(LUN[LUN_INDEX].mediaParameters)
-#define LUNSectorWrite(bLBA,pDest,seg)      LUN[LUN_INDEX].SectorWrite(LUN[LUN_INDEX].mediaParameters, bLBA, pDest, seg)
-#define LUNWriteProtectState()              LUN[LUN_INDEX].WriteProtectState(LUN[LUN_INDEX].mediaParameters)
-#define LUNSectorRead(bLBA,pSrc,seg)        LUN[LUN_INDEX].SectorRead(LUN[LUN_INDEX].mediaParameters, bLBA, pSrc, seg)
+                
+#define LUNMediaInitialize()                DIRECT_MediaInitialize()
+#define LUNReadCapacity()                   ((uint32_t) DRV_TOTAL_DISK_SIZE - 1)//DIRECT_CapacityRead()
+#define LUNReadSectorSize()                 (FILEIO_CONFIG_MEDIA_SECTOR_SIZE)//DIRECT_SectorSizeRead()
+#define LUNMediaDetect()                    DIRECT_MediaDetect()
+#define LUNSectorWrite(bLBA,pDest,seg)      DIRECT_SectorWrite(bLBA, pDest, seg)
+#define LUNWriteProtectState()              (false)//DIRECT_WriteProtectStateGet()
+#define LUNSectorRead(bLBA,pSrc,seg)        DIRECT_SectorRead(bLBA, pSrc, seg)
 
 //Adjustable user options
 #define MSD_FAILED_READ_MAX_ATTEMPTS  (uint8_t)1u    //Used for error case handling
