@@ -10,6 +10,7 @@
 #include <xc.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "crc32.h"
 
 #define CRC32_POLYNOMIAL (0xEDB88320UL)
 
@@ -66,7 +67,3 @@ uint32_t crc32_bitwise(void* data, uint16_t length, uint32_t previousCrc32) {
 
     return previousCrc32; // same as crc ^ 0xFFFFFFFF
 }
-
-uint32_t crc32_finish(uint32_t previousCrc32) {
-    return ~previousCrc32; // same as previousCrc32 ^ 0xFFFFFFFF
-}    

@@ -14,7 +14,8 @@ extern "C" {
 
     //#define CRC32_UNROLLED_LOOP
     uint32_t crc32_bitwise(void* data, uint16_t length, uint32_t previousCrc32);
-    uint32_t crc32_finish(uint32_t previousCrc32);
+    #define crc32_finish(previousCrc32) (~previousCrc32) 
+
 
 #ifdef	__cplusplus
 }
