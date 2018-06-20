@@ -5,7 +5,7 @@
  *
  * Created on May 29, 2018, 1:08 PM
  */
-#if !(defined(_16F1454)) || defined(_16F1455))
+#if !(defined(_16F1454) || defined(_16F1455))
 #error "This include file is specific to PIC16F1454 or PIC16F1455"
 #endif
 
