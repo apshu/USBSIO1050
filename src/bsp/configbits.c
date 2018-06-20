@@ -8,13 +8,15 @@
 
 /** CONFIGURATION Bits **********************************************/
 #if __DEBUG
-#pragma config FOSC = HS       // Oscillator Selection Bits 
+#pragma config FOSC = HS        // Oscillator Selection Bits 
 #pragma config PWRTE = OFF      // Power-up Timer Enable (PWRT disabled)
 #pragma config PLLMULT = 4x     // PLL Multipler Selection Bit (3x Output Frequency Selected)
+#pragma config FCMEN = ON       // Fail-Safe Clock Monitor Enable (Fail-Safe Clock Monitor is disabled)
 #else
-#pragma config FOSC = ECH       // Oscillator Selection Bits 16Mhz External clock
+#pragma config FOSC = INTOSC    // Oscillator Selection Bits 16Mhz External clock
 #pragma config PWRTE = ON       // Power-up Timer Enable (PWRT disabled)
 #pragma config PLLMULT = 3x     // PLL Multipler Selection Bit (3x Output Frequency Selected) 16MHz
+#pragma config FCMEN = OFF      // Fail-Safe Clock Monitor Enable (Fail-Safe Clock Monitor is disabled)
 #endif
 #pragma config WDTE = SWDTEN    // Watchdog Timer Enable (WDT disabled)
 #pragma config MCLRE = ON       // MCLR Pin Function Select (MCLR/VPP pin function is IOPIN)
@@ -22,7 +24,6 @@
 #pragma config BOREN = ON       // Brown-out Reset Enable (Brown-out Reset enabled)
 #pragma config CLKOUTEN = OFF   // Clock Out Enable (CLKOUT function is disabled. I/O or oscillator function on the CLKOUT pin)
 #pragma config IESO = OFF       // Internal/External Switchover Mode (Internal/External Switchover Mode is disabled)
-#pragma config FCMEN = ON       // Fail-Safe Clock Monitor Enable (Fail-Safe Clock Monitor is disabled)
 
 // CONFIG2
 #pragma config WRT = BOOT        // Flash Memory Self-Write Protection (Write protection off)
